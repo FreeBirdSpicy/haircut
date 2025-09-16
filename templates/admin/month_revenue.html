@@ -1,0 +1,197 @@
+{{define "admin/month_revenue.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    {{template "public/style.html" .}}
+    <script src="/static/js/echarts.min.js"></script>
+    <style>
+        .navbar {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        .nav-item {
+            margin: 0 5px;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link {
+            color: #495057;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link.on {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .navbar-nav {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .export-btn-container {
+            margin-left: 50px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-primary {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+        }
+
+        table {width: 360px !important;}
+        .tx_r {text-align: right !important;}
+        #month_bar {margin-left: 100px;width: 600px;height:400px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-sm">
+            <ul class="navbar-nav">
+                {{range $i, $v := .monthMenu}}
+                <li class="nav-item">
+                    <a class="nav-link {{$v.On}}" href="?month={{$v.Value}}">{{$v.Name}}</a>
+                </li>
+                {{end}}
+                <li class="nav-item export-btn-container">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="exportExcel(this);">导出Excel</button>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="row">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th width="120px"></th>
+                        <th width="120px" class="tx_r">营业额(元)</th>
+                        <th width="120px" class="tx_r">订单数量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $k,$v :=.data}}
+                    <tr>
+                        <td align="center">{{$v.Day}}</td>
+                        <td align="right">
+                            {{if ne $v.Price 0.00}}
+                                {{$v.Price}}
+                            {{end}}
+                        </td>
+                        <td align="right">
+                            {{if ne $v.Num 0}}
+                                {{$v.Num}}
+                            {{end}}
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            
+            <div id="month_bar"></div>
+        </div>
+    </div>
+
+
+    {{template "pop_window_remind" .}}
+    {{template "pop_window_sm_center" .}}
+</body>
+<script>
+    function exportExcel(t) {
+        $(t).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>下载中...');
+        $(t).attr('disabled', true);
+        $.post("monthRevenueExport", {month: '{{.month}}'}, function(res) {
+            $(t).html('导出Excel');
+            $(t).attr('disabled', false);
+            if (res.code == 200) {
+                pop_window_remind("提示", res.msg);
+                setTimeout(function(){
+                    pop_window_remind_close();
+                }, 1500);
+            } else {
+                pop_window_sm_center("提示", res.msg);
+            }
+        }, "json")
+    }
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('month_bar'));
+
+    $.post("/MonthRevenueChart", {}, function(res) { 
+        console.log(res);
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: '月度营业额'
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: res.monthMenu.map(item => item.value),
+                }
+            ],
+            yAxis: {},
+            series: [
+                { 
+                    type: 'bar',
+                    data: res.data.map(item => item.price), // 提取价格数据
+                    itemStyle: {
+                        color: '#409EFF' // 设置柱子颜色为蓝色
+                    },
+                    label: {
+                        show: true, // 显示标签
+                        position: 'top', // 标签位置在顶部
+                        formatter: '{c}' // 显示数值
+                    },
+                    markLine: {
+                        data: [{ type: 'average', name: 'Avg' }],
+                        lineStyle: {
+                            color: '#F56C6C', // 设置平均值线颜色
+                            width: 2 
+                        },
+                        label: {
+                            color: '#F56C6C',  // 设置标签文字颜色
+                            fontWweight: 'bold'
+                        }
+                    }
+                }
+            ],
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    }, "json")
+
+    
+</script>
+</html>
+{{end}}

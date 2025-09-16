@@ -1,0 +1,181 @@
+{{define "public/pagination.html"}}
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+    }
+</style>
+<div class="pagination-container">
+    <div class="pagination-info">
+        共 <span id="totalRecords">0</span> 条记录，每页 <span id="pageSize">10</span> 条，共 <span id="totalPages">0</span> 页
+    </div>
+    <nav aria-label="Page navigation">
+        <ul class="pagination" id="pagination">
+            <li class="page-item disabled" id="prevPage">
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <!-- 页码将通过JavaScript动态生成 -->
+            <li class="page-item disabled" id="nextPage">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<script>
+    // 分页相关变量
+    var totalRecords = parseInt("{{.total}}"); // 数据总数
+    var currentPage = parseInt("{{.page}}"); // 当前页码
+    var pageSize = 10; // 每页显示的记录数
+    var totalPages = 0; // 总页数
+    
+    // 初始化分页信息
+    $(document).ready(function() {
+        updatePagination();
+    });
+
+    // 更新分页信息
+    function updatePagination() {
+        totalPages = Math.ceil(totalRecords / pageSize);
+        
+        // 更新统计信息
+        $('#totalRecords').text(totalRecords);
+        $('#pageSize').text(pageSize);
+        $('#totalPages').text(totalPages);
+        
+        // 生成页码
+        generatePageNumbers();
+        
+        // 更新上一页/下一页状态
+        updatePrevNextStatus();
+    }
+    
+    // 生成页码按钮
+    function generatePageNumbers() {
+        var startPage, endPage;
+        
+        // 计算显示的页码范围
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 1 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+        
+        // 清空现有的页码（除了上一页和下一页）
+        $('#prevPage').nextUntil('#nextPage').remove();
+        
+        // 添加页码按钮
+        for (var i = startPage; i <= endPage; i++) {
+            var activeClass = (i == currentPage) ? ' active' : '';
+            var pageItem = '<li class="page-item' + activeClass + '">' +
+                           '<a class="page-link" href="#" data-page="' + i + '">' + i + '</a>' +
+                           '</li>';
+            $('#nextPage').before(pageItem);
+        }
+        
+        // 绑定页码点击事件
+        $('.page-link[data-page]').on('click', function(e) {
+            e.preventDefault();
+            var page = parseInt($(this).data('page'));
+            goToPage(page);
+        });
+    }
+    
+    // 更新上一页/下一页按钮状态
+    function updatePrevNextStatus() {
+        if (currentPage === 1) {
+            $('#prevPage').addClass('disabled');
+        } else {
+            $('#prevPage').removeClass('disabled');
+        }
+        
+        if (currentPage === totalPages) {
+            $('#nextPage').addClass('disabled');
+        } else {
+            $('#nextPage').removeClass('disabled');
+        }
+    }
+    
+    // 跳转到指定页
+    function goToPage(page) {
+        console.log("goToPage: " + page);
+        if (page < 1 || page > totalPages || page === currentPage) {
+            return;
+        }
+        
+        currentPage = page;
+        
+        // 这里应该重新加载数据
+        loadData(currentPage, pageSize);
+        
+        // 更新分页
+        updatePagination();
+    }
+    
+    // 上一页
+    $('#prevPage .page-link').on('click', function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    });
+    
+    // 下一页
+    $('#nextPage .page-link').on('click', function(e) {
+        e.preventDefault();
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    });
+
+    /* 
+    function loadData(page, size) {
+        $.get('/api/tickets', {
+            page: page,
+            size: size
+        }, function(data) {
+            // 清空表格
+            $('#ticketTableBody').empty();
+            
+            // 填充新数据
+            $.each(data.items, function(index, item) {
+                var row = '<tr>' +
+                          '<td class="center">' + item.Id + '</td>' +
+                          '<td>' + item.Name + '</td>' +
+                          '<td class="center">' + item.Price + '</td>' +
+                          '<td>' +
+                          '<button type="button" class="btn btn-primary">编辑</button> ' +
+                          '<button type="button" class="btn btn-danger">删除</button>' +
+                          '</td>' +
+                          '</tr>';
+                $('#ticketTableBody').append(row);
+            });
+            
+            // 更新分页信息
+            totalRecords = data.total;
+            updatePagination();
+        });
+    } 
+    */
+</script>
+{{end}}

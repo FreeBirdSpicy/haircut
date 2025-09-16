@@ -1,0 +1,144 @@
+{{define "admin/today_revenue.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    {{template "public/style.html" .}}
+    <style>
+        html, body {height: 100%;padding: 0;}
+        .container {width: 700px;height: 100%;padding: 50px 0;}
+        .con-header, .con-body {padding: 20px;font-size: 18px;border: 1px solid #e0e0e0;border-radius: 6px;box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.05);background-color: #fff;}
+        .con-header {padding: 50px 0;margin-bottom: 50px;}
+        
+        .count {text-align: center;font-size: 30px;font-weight: bold;}
+        .count:first-child {border-right: 1px solid #e0e0e0;;}
+        #today_revenue, #today_order {font-size: 50px;color: #ff0000;}
+
+        #tickets {margin-top: 5px;}
+        td {padding: 20px !important;}
+        .a {border: 1px solid #ff0000;}
+        .c {border: 1px solid #00ff00;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="con-header row">
+            <div class="col-md-6 count">
+                <h3>今日营收</h3>
+                <span id="today_revenue">{{.total_price}}</span> 元
+            </div>
+            <div class="col-md-6 count">
+                <h3>今日订单</h3>
+                <span id="today_order">{{.total_num}}</span> 单
+            </div>
+        </div>
+        <div class="con-body row">
+            <table class="table table-borderless" width="100%">
+                <tbody>
+                    <tr>
+                        <td width="250" align="right" style="vertical-align: middle;">项目</td>
+                        <td>
+                            <input type="text" class="form-control w_300" name="keyword" placeholder="输入名称回车搜索">
+                            <select class="form-control w_300" name="tickets" id="tickets" onchange="checkTicket(this);">
+                                <option value="0">选择项目</option>
+                                {{range $k,$v :=.tickets}}
+                                <option value="{{$v.Id}}" price="{{$v.Price}}">{{$v.Name}}</option>
+                                {{end}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">价格</td>
+                        <td>
+                            <input type="text" class="form-control w_300" id="price" name="price" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <button type="button" class="btn btn-primary" onclick="doSubmit();">提交</button>
+                            <input type="hidden" name="t_id" id="t_id" value="">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{template "pop_window_remind" .}}
+    {{template "pop_window_sm_center" .}}
+</body>
+<script>
+    var tickets = $("#tickets option");
+    var tickets_html = $("#tickets").html();
+
+    $(document).ready(function(){
+        $("input[name=keyword]").keyup(function(event){
+            if(event.which === 13){
+                var keyword = $(this).val();
+                drawSelect(keyword);
+            }
+        });
+    });
+
+    function drawSelect(keyword) {
+        if (keyword == "") {
+            $("#tickets").html(tickets_html);
+            return;
+        }
+        var html = "<option value='0'>请选择</option>";
+        for (var i = 0; i < tickets.length; i++) {
+            var ticket = tickets[i];
+            var name = $(ticket).text();
+            var value = $(ticket).val();
+            var price = $(ticket).attr("price");
+            if (value == 0) {
+                continue;
+            }
+            if (name.indexOf(keyword) == -1) {
+                continue;
+            }
+            html += '<option value="'+value+'" price="'+price+'">'+name+'</option>';
+        }
+        $("#tickets").html(html);
+    }
+
+    function checkTicket(t) {
+        var t_id = $(t).val();
+        if (t_id == 0) {
+            $("#price").val("");
+            return;
+        }
+        var price = $("#tickets option[value='"+t_id+"']").attr("price");
+        $("#price").val(price);
+    }
+
+    function doSubmit() {
+        var t_id = $("#tickets").val();
+        if (t_id == "") {
+            pop_window_sm_center("提示", "请选择项目");
+            return;
+        }
+        var price = $("#price").val();
+        if (price == "") {
+            pop_window_sm_center("提示", "请填写价格");
+            return;
+        }
+        var url = "/revenueLogAdd";
+        $.post(url, {t_id:t_id, price:price}, function(res) {
+            console.log(res);
+            if (res.code == 200) {
+                pop_window_remind("提示", res.msg);
+                setTimeout(function(){
+                    window.location.reload();
+                }, 2000);
+            } else {
+                pop_window_sm_center("提示", res.msg);
+                return;
+            }
+        }, "json")
+    }
+</script>
+</html>
+{{end}}

@@ -1,0 +1,14 @@
+[GIN-debug] GET    /login                    --> hs_project/controllers/admin.LoginController.Index-fm (3 handlers)
+[GIN-debug] POST   /login                    --> hs_project/controllers/admin.LoginController.Login-fm (3 handlers)
+[GIN-debug] GET    /                         --> hs_project/controllers/admin.AdminController.Index-fm (4 handlers)
+[GIN-debug] GET    /todayRevenue             --> hs_project/controllers/admin.AdminController.TodayRevenue-fm (4 handlers)
+[GIN-debug] POST   /revenueLogAdd            --> hs_project/controllers/admin.AdminController.RevenueLogAdd-fm (4 handlers)
+[GIN-debug] GET    /monthRevenue             --> hs_project/controllers/admin.AdminController.MonthRevenue-fm (4 handlers)
+[GIN-debug] GET    /ticket                   --> hs_project/controllers/admin.TicketController.Index-fm (4 handlers)
+[GIN-debug] POST   /ticket_edit              --> hs_project/controllers/admin.TicketController.Edit-fm (4 handlers)
+[GIN-debug] POST   /ticket_del               --> hs_project/controllers/admin.TicketController.Delete-fm (4 handlers)
+[GIN-debug] GET    /specialOffer             --> hs_project/controllers/admin.SpecialOfferController.Index-fm (4 handlers)
+[GIN-debug] GET    /emp                      --> hs_project/controllers/admin.EmpController.Index-fm (4 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080

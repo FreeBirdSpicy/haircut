@@ -1,0 +1,295 @@
+{{define "admin/index.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>{{.title}}</title>
+    {{template "public/style.html" .}}
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            position: relative;
+            width: 250px;
+            height: 100%;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        /* 折叠状态下的侧边栏 */
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        /* 主内容区域样式 */
+        .main-content {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-navbar {
+            height: 60px;
+            background: #343a40;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            z-index: 100;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            /* margin-right: 1rem; */
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 侧边栏内容区域 */
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            height: calc(100% - 60px);
+        }
+
+        /* iframe容器 */
+        .iframe-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: 0;
+                transform: translateX(0);
+                transition: transform 0.3s ease;
+                z-index: 1001;
+            }
+            
+            .sidebar.hidden {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: none;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            display: none;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 0.25rem solid rgba(0, 0, 0, 0.1);
+            border-top: 0.25rem solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 滚动条样式优化 */
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3);
+        }
+        
+        /* 折叠图标旋转动画 */
+        .sidebar.collapsed .collapse-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <div class="top-navbar">
+                <button class="toggle-btn" id="toggleSidebar">
+                    <!-- <i class="fas fa-bars"></i> -->
+                    <i class="fa-solid fa-scissors fa-rotate-180"></i>
+                </button>
+                <div class="app-title">剪艺后台管理系统</div>
+            </div>
+            <div class="sidebar-content">
+                {{template "public/admin_left.html" .}}
+            </div>
+        </div>
+        
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <div class="iframe-container">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                </div>
+                <iframe id="mainFrame" src="todayRevenue" frameborder="0"></iframe>
+            </div>
+        </div>
+        
+        <!-- 移动端遮罩层 -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    </div>
+</body>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // 切换侧边栏折叠状态
+    $('#toggleSidebar').on('click', function() {
+        $('#sidebar').toggleClass('collapsed');
+        
+        // 在折叠状态下，鼠标悬停时临时展开
+        if ($('#sidebar').hasClass('collapsed')) {
+            $('#sidebar').on('mouseenter', function() {
+                $(this).removeClass('collapsed');
+            });
+            
+            $('#sidebar').on('mouseleave', function() {
+                $(this).addClass('collapsed');
+            });
+        } else {
+            // 移除悬停事件
+            $('#sidebar').off('mouseenter mouseleave');
+        }
+    });
+    
+    // 移动端侧边栏控制
+    $('#toggleSidebar').on('click', function() {
+        if (window.innerWidth <= 768) {
+            $('#sidebar').toggleClass('hidden');
+            $('#sidebarOverlay').toggleClass('active');
+        }
+    });
+    
+    // 点击遮罩层关闭侧边栏
+    $('#sidebarOverlay').on('click', function() {
+        $('#sidebar').addClass('hidden');
+        $(this).removeClass('active');
+    });
+    
+    // iframe加载状态控制
+    var iframe = document.getElementById('mainFrame');
+    var loadingOverlay = document.getElementById('loadingOverlay');
+    
+    iframe.onload = function() {
+        loadingOverlay.style.display = 'none';
+    };
+    
+    iframe.onloadstart = function() {
+        loadingOverlay.style.display = 'flex';
+    };
+    
+    // 监听窗口大小变化
+    $(window).on('resize', function() {
+        if (window.innerWidth > 768) {
+            $('#sidebar').removeClass('hidden');
+            $('#sidebarOverlay').removeClass('active');
+        }
+    });
+    
+    // 传递折叠状态到admin_left.html中的菜单
+    $('#toggleSidebar').on('click', function() {
+        // 触发自定义事件，通知侧边栏菜单状态已改变
+        setTimeout(function() {
+            $(window).trigger('sidebarCollapsed');
+        }, 300);
+    });
+    
+    // 监听侧边栏折叠事件
+    $(window).on('sidebarCollapsed', function() {
+        // 可以在这里添加其他需要在侧边栏折叠时执行的逻辑
+    });
+});
+</script>
+</html>
+{{end}}

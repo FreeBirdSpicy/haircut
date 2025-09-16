@@ -1,0 +1,189 @@
+{{define "public/admin_left.html"}}
+<style>
+/* 侧边栏手风琴样式 */
+#accordion {
+  height: 100%;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, .03);
+}
+
+.card-header {
+  padding: 0;
+}
+
+.card-body {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.navbar {
+  padding: 0 1em;
+}
+
+.navbar-nav {
+  width: 100%;
+  padding-left: 20px;
+}
+
+a {
+  color: #364149;
+}
+
+a.on {
+  color: #008cff;
+}
+
+.card-header a.on {
+  font-weight: bold;
+}
+
+.card-link {
+  display: block;
+  padding: .75rem 1.25rem;
+  position: relative;
+}
+
+/* 收起状态下的菜单项样式 */
+.sidebar.collapsed .nav-text {
+  display: none;
+}
+
+.sidebar.collapsed .card-link {
+  text-align: center;
+  padding: .75rem 0;
+}
+
+.sidebar.collapsed .navbar {
+  padding: 0;
+}
+
+.sidebar.collapsed .nav-item {
+  text-align: center;
+}
+
+/* 折叠图标 */
+.collapse-icon {
+  float: right;
+  transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed .collapse-icon {
+  transform: rotate(180deg);
+}
+
+/* 子菜单项在收起状态下的样式 */
+.sidebar.collapsed .nav-link {
+  padding: .5rem 0;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.sidebar.collapsed .nav-link::before {
+  display: block;
+  content: attr(data-title);
+}
+</style>
+
+<div id="accordion">
+    <div class="card">
+        <div class="card-header">
+            <a class="card-link on" data-toggle="collapse" href="#collapse1" onclick="changeCard(this)">
+                <span class="nav-text">数据分析</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+            </a>
+        </div>
+        <div id="collapse1" class="collapse show" data-parent="#accordion">
+            <nav class="navbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link on" href="javascript:void(0);" onclick="setFocus(1, this);" data-title="今日营收">
+                            <span class="nav-text">今日营收</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="setFocus(2, this);" data-title="月度营收">
+                            <span class="nav-text">月度营收</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <a class="card-link" data-toggle="collapse" href="#collapse2" onclick="changeCard(this)">
+                <span class="nav-text">营业活动</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+            </a>
+        </div>
+        <div id="collapse2" class="collapse" data-parent="#accordion">
+            <nav class="navbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="setFocus(3, this);" data-title="项目管理">
+                            <span class="nav-text">项目管理</span>
+                        </a>
+                    </li>
+                    <!-- <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="setFocus(4, this);" data-title="节日特价">
+                            <span class="nav-text">节日特价</span>
+                        </a>
+                    </li> -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- <div class="card">
+        <div class="card-header">
+            <a class="card-link" data-toggle="collapse" href="#collapse3" onclick="changeCard(this)">
+                <span class="nav-text">员工管理</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+            </a>
+        </div>
+        <div id="collapse3" class="collapse" data-parent="#accordion">
+            <nav class="navbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="setFocus(5, this);" data-title="店员">
+                            <span class="nav-text">店员</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div> -->
+</div>
+
+<script type="text/javascript">
+var url = new Array();
+url[1] = "todayRevenue";
+url[2] = "monthRevenue";
+url[3] = "ticket";
+url[4] = "specialOffer";
+url[5] = "emp";
+
+function changeCard(t){
+    var is_on = $(t).hasClass("on");
+    if (is_on) {
+        return;
+    } else {
+        $(".card-link").removeClass("on");
+        $(t).addClass("on");
+    }
+}
+
+function setFocus(n, t){
+    var is_on = $(t).hasClass("on");
+    if (is_on) {
+        return;
+    } else {
+        $(".nav-link").removeClass("on");
+        $(t).addClass("on");
+
+        var iframe = document.getElementsByTagName('iframe')[0];
+        iframe.src = url[n];
+        iframe.focus();
+    }
+}
+</script>
+{{end}}
