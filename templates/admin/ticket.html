@@ -1,0 +1,160 @@
+{{define "admin/ticket.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    {{template "public/style.html" .}}
+
+    <style>
+        .container {padding: 50px 0;}
+        .header {display: flex; justify-content: space-between;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="input-group mb-3 w_300">
+                <input type="text" class="form-control" name="keyword" id="keyword" placeholder="请输入项目名称" value="{{.keyword}}" />
+                <div class="input-group-append">
+                    <button class="btn btn-success" type="button" onclick="search();">搜索</button>  
+                </div>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" onclick="Edit();">新增项目</button>
+            </div>
+        </div>
+        
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th width="80px" class="center">序号</th>
+                    <th width="200px">名称</th>
+                    <th width="100px" class="center">价格(元)</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $k,$v :=.data}}
+                <tr>
+                    <td class="center">{{$v.Id}}</td>
+                    <td>{{$v.Name}}</td>
+                    <td class="center">{{$v.Price}}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="Edit('{{$v.Id}}','{{$v.Name}}','{{$v.Price}}','{{$v.State}}');">修改</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="Del('{{$v.Id}}');">删除</button>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{template "public/pagination.html" .}}
+
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- 模态框头部 -->
+                <div class="modal-header">
+                    <h4 class="modal-title">编辑项目</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <!-- 模态框主体 -->
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="name">项目名称：</label>
+                            <input type="text" class="form-control w_200" id="name" name="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="price">项目价格：</label>
+                            <input type="text" class="form-control w_100" id="price" name="price"> 元
+                        </div>
+                    </form>
+                </div>
+                <!-- 模态框底部 -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="doSubmit()">提交</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <input type="hidden" name="id" id="id" value="0" />
+                    <input type="hidden" name="state" id="state" value="1" />
+                </div>
+            </div>
+        </div>
+    </div>
+    {{template "pop_window_remind" .}}
+    {{template "pop_window_sm_center" .}}
+
+</body>
+<script>
+    var keyword = "";
+
+    function doSubmit() {
+        var id = $("#id").val();
+        var name = $("#name").val();
+        var price = $("#price").val();
+        var state = $("#state").val();
+        if (name == "") {
+            pop_window_sm_center("提示", "请输入项目名称");
+            return;
+        }
+        if (price == "") {
+            pop_window_sm_center("提示", "请输入项目价格");
+            return;
+        }
+
+        $.post("/ticket_edit", {name: name, price: price, id: id, state: state}, function(res){
+            if (res.code == 200) {
+                $("#myModal").modal("hide");
+
+                pop_window_remind("提示", res.msg);
+                setTimeout(function(){
+                    window.location.reload();
+                }, 2000);
+            } else {
+                pop_window_sm_center("提示", res.msg);
+                return;
+            }
+        }, "json")
+    }
+
+    function search() {
+        var keyword = $("#keyword").val();
+        loadData(1, 10, keyword);
+    }
+
+    // 模拟加载数据的函数（需要根据实际后端接口调整）
+    function loadData(page, size, keyword="") {
+        location.href = '/ticket?page=' + page + '&limit=' + size + '&keyword=' + keyword;
+    }
+
+    function Edit(id=0, name='', price='', state=1) {
+        $("#id").val(id);
+        $("#name").val(name);
+        $("#price").val(price);
+        $("#state").val(state);
+        $('#myModal').modal('show');
+    }
+
+    function Del(id) {
+        if (!confirm("确定要删除吗？")) {
+            return;
+        }
+        $.post("/ticket_del", {id: id}, function(res){
+            if (res.code == 200) {
+                pop_window_remind("提示", res.msg);
+                setTimeout(function(){
+                    window.location.reload();
+                }, 2000);
+            } else {
+                pop_window_sm_center("提示", res.msg);
+                return;
+            }
+        })
+    }
+</script>
+</html>
+{{end}}

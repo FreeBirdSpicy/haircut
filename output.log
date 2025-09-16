@@ -1,0 +1,53 @@
+nohup: ignoring input
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] Loaded HTML Templates (25): 
+	- public/pagination.html
+	- pop_window_remind.html
+	- pop_window_sm_center.html
+	- admin/emp.html
+	- admin/index.html
+	- admin/login.html
+	- admin/month_revenue.html
+	- special_offer.html
+	- admin/special_offer.html
+	- admin/today_revenue.html
+	- emp.html
+	- index.html
+	- month_revenue.html
+	- ticket.html
+	- public/admin_left.html
+	- pop_window_remind
+	- pop_window_sm_center
+	- style.html
+	- 
+	- admin/ticket.html
+	- admin_left.html
+	- public/style.html
+	- login.html
+	- today_revenue.html
+	- pagination.html
+
+[GIN-debug] GET    /static/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /static/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /login                    --> hs_project/controllers/admin.LoginController.Index-fm (3 handlers)
+[GIN-debug] POST   /login                    --> hs_project/controllers/admin.LoginController.Login-fm (3 handlers)
+[GIN-debug] GET    /                         --> hs_project/controllers/admin.AdminController.Index-fm (4 handlers)
+[GIN-debug] GET    /todayRevenue             --> hs_project/controllers/admin.AdminController.TodayRevenue-fm (4 handlers)
+[GIN-debug] POST   /revenueLogAdd            --> hs_project/controllers/admin.AdminController.RevenueLogAdd-fm (4 handlers)
+[GIN-debug] GET    /monthRevenue             --> hs_project/controllers/admin.AdminController.MonthRevenue-fm (4 handlers)
+[GIN-debug] POST   /monthRevenueExport       --> hs_project/controllers/admin.AdminController.MonthRevenueExport-fm (4 handlers)
+[GIN-debug] POST   /MonthRevenueChart        --> hs_project/controllers/admin.AdminController.MonthRevenueChart-fm (4 handlers)
+[GIN-debug] GET    /ticket                   --> hs_project/controllers/admin.TicketController.Index-fm (4 handlers)
+[GIN-debug] POST   /ticket_edit              --> hs_project/controllers/admin.TicketController.Edit-fm (4 handlers)
+[GIN-debug] POST   /ticket_del               --> hs_project/controllers/admin.TicketController.Delete-fm (4 handlers)
+[GIN-debug] GET    /specialOffer             --> hs_project/controllers/admin.SpecialOfferController.Index-fm (4 handlers)
+[GIN-debug] GET    /emp                      --> hs_project/controllers/admin.EmpController.Index-fm (4 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN-debug] [ERROR] listen tcp :8080: bind: address already in use
