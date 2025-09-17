@@ -196,9 +196,9 @@
                 $.post("/login", {username:username,password:password}, function(res,){
                     if (res.code == 200) {
                         pop_window_remind("提示", "登录成功");
-                        setTimeout(function(){
-                            window.location.href = "/";
-                        }, 1000);
+                        // setTimeout(function(){
+                        //     window.location.href = "/";
+                        // }, 1000);
                     } else {
                         pop_window_sm_center("提示", res.msg);
                         return;
