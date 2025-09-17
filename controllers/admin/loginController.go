@@ -48,7 +48,7 @@ func (lc LoginController) Login(c *gin.Context) {
 	} else {
 		// 登录成功，设置会话
 		emp_key := username + "," + password
-		c.SetCookie("emp_key", emp_key, 86400, "/", "localhost", false, true)
+		c.SetCookie("emp_key", emp_key, 86400, "/", "haircut.cloud", false, true)
 
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
