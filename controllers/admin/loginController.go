@@ -3,7 +3,6 @@ package admin
 import (
 	"hs_project/models"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,21 +49,14 @@ func (lc LoginController) Login(c *gin.Context) {
 		// 登录成功，设置会话
 		emp_key := username + "," + password
 
-		// 根据请求主机设置cookie域
-		host := c.Request.Host
-		if colonIndex := strings.Index(host, ":"); colonIndex != -1 {
-			host = host[:colonIndex]
-		}
-		var domain string
-		if strings.Contains(host, "localhost") || strings.Contains(host, "127.0.0.1") {
-			domain = "" // 本地开发环境
-		} else {
-			domain = host // 生产环境
-		}
+		// 为生产环境设置正确的域名
+		domain := "haircut.cloud"
 
-		// HTTPS安全设置
+		// HTTPS环境下，可以设置Secure为true
 		isSecure := c.Request.TLS != nil
 
+		// 清除可能存在的旧cookie
+		c.SetCookie("emp_key", "", -1, "/", domain, false, true)
 		c.SetCookie("emp_key", emp_key, 86400, "/", domain, isSecure, true)
 
 		c.JSON(http.StatusOK, gin.H{
