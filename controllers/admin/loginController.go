@@ -52,6 +52,9 @@ func (lc LoginController) Login(c *gin.Context) {
 
 		// 根据请求主机设置cookie域
 		host := c.Request.Host
+		if colonIndex := strings.Index(host, ":"); colonIndex != -1 {
+			host = host[:colonIndex]
+		}
 		var domain string
 		if strings.Contains(host, "localhost") || strings.Contains(host, "127.0.0.1") {
 			domain = "" // 本地开发环境
@@ -59,7 +62,10 @@ func (lc LoginController) Login(c *gin.Context) {
 			domain = host // 生产环境
 		}
 
-		c.SetCookie("emp_key", emp_key, 86400, "/", domain, false, true)
+		// HTTPS安全设置
+		isSecure := c.Request.TLS != nil
+
+		c.SetCookie("emp_key", emp_key, 86400, "/", domain, isSecure, true)
 
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
