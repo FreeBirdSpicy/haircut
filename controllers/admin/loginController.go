@@ -3,6 +3,7 @@ package admin
 import (
 	"hs_project/models"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,7 +49,17 @@ func (lc LoginController) Login(c *gin.Context) {
 	} else {
 		// 登录成功，设置会话
 		emp_key := username + "," + password
-		c.SetCookie("emp_key", emp_key, 86400, "/", "", false, true)
+
+		// 根据请求主机设置cookie域
+		host := c.Request.Host
+		var domain string
+		if strings.Contains(host, "localhost") || strings.Contains(host, "127.0.0.1") {
+			domain = "" // 本地开发环境
+		} else {
+			domain = host // 生产环境
+		}
+
+		c.SetCookie("emp_key", emp_key, 86400, "/", domain, false, true)
 
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
