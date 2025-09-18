@@ -63,8 +63,9 @@ func (lc LoginController) Login(c *gin.Context) {
 		c.SetCookie("emp_key", emp_key, 86400, "/", realDomain, isSecure, true)
 
 		c.JSON(http.StatusOK, gin.H{
-			"code": 200,
-			"msg":  "登录成功",
+			"code":       200,
+			"msg":        "登录成功",
+			"realDomain": realDomain,
 		})
 	}
 }
