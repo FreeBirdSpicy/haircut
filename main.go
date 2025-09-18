@@ -30,6 +30,15 @@ func main() {
 	// 静态文件
 	router.Static("/static", "./static") // 参数1：引用时使用的url，参数2：静态文件目录
 
+	// 启用反向代理支持
+	router.Use(func(c *gin.Context) {
+		if forwardedHost := c.GetHeader("X-Forwarded-Host"); forwardedHost != "" {
+			c.Request.Host = forwardedHost
+		}
+		c.Next()
+	})
+
+	// 路由组
 	routers.AdminRoutersInit(router)
 
 	router.Run(":8080")
