@@ -64,7 +64,7 @@ func (lc LoginController) Login(c *gin.Context) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"code":       200,
-			"msg":        "登录成功4",
+			"msg":        "登录成功5",
 			"realDomain": realDomain,
 		})
 	}
