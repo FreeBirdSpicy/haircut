@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -30,8 +31,13 @@ type monthData struct {
 }
 
 func (ac AdminController) Index(c *gin.Context) {
+	emp_key, _ := c.Cookie("emp_key")
+	emp_key_arr := strings.Split(emp_key, ",")
+	username := emp_key_arr[0]
+
 	c.HTML(http.StatusOK, "admin/index.html", gin.H{
-		"title": "首页",
+		"title":    "首页",
+		"username": username,
 	})
 }
 
