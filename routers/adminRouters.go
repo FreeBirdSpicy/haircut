@@ -15,7 +15,17 @@ func checkLogin(c *gin.Context) {
 	emp_key, err := c.Cookie("emp_key")
 
 	if err != nil {
-		c.Redirect(http.StatusFound, "/login")
+		// 如果在 iframe 中，则用 JS 跳出 iframe
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.String(http.StatusOK, `
+            <script>
+                if (window.self !== window.top) {
+                    window.top.location.href = '/login';
+                } else {
+                    window.location.href = '/login';
+                }
+            </script>
+        `)
 		c.Abort()
 		return
 	}
@@ -26,7 +36,17 @@ func checkLogin(c *gin.Context) {
 	emp := models.Emp{}
 	models.DB.Where("username = ? and password = ? and state = 1", username, password).Find(&emp)
 	if emp.Id == 0 {
-		c.Redirect(http.StatusFound, "/login")
+		// 如果在 iframe 中，则用 JS 跳出 iframe
+		c.Header("Content-Type", "text/html; charset=utf-8")
+		c.String(http.StatusOK, `
+            <script>
+                if (window.self !== window.top) {
+                    window.top.location.href = '/login';
+                } else {
+                    window.location.href = '/login';
+                }
+            </script>
+        `)
 		c.Abort()
 		return
 	}
