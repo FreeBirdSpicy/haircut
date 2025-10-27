@@ -125,6 +125,8 @@
     {{template "pop_window_sm_center" .}}
 </body>
 <script>
+    var month = '{{.month}}';
+    
     function exportExcel(t) {
         $(t).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>下载中...');
         $(t).attr('disabled', true);
