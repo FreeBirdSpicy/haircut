@@ -78,16 +78,25 @@ func ToString(value interface{}) string {
 
 // 获取最近半年的月份
 func GetLastHalfYear() []MonthMenu {
-	monthMenuList := []MonthMenu{}
+	monthMenuList := make([]MonthMenu, 6)
+	now := time.Now()
+
+	// 获取当前月份的第一天，避免日期计算问题
+	currentMonthFirst := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
 	for i := 0; i < 6; i++ {
-		name := time.Now().AddDate(0, -i, 0).Format("1月")
-		value := time.Now().AddDate(0, -i, 0).Format("2006-01")
-		item := MonthMenu{
+		// 每次从当前月的第一天减去i个月
+		date := currentMonthFirst.AddDate(0, -i, 0)
+
+		name := date.Format("1月")
+		value := date.Format("2006-01")
+
+		monthMenuList[i] = MonthMenu{
 			Name:  name,
 			Value: value,
 		}
-		monthMenuList = append(monthMenuList, item)
 	}
+
 	return monthMenuList
 }
 

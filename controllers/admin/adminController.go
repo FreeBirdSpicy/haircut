@@ -205,16 +205,24 @@ func (ac AdminController) MonthRevenueExport(c *gin.Context) {
 func (ac AdminController) MonthRevenueChart(c *gin.Context) {
 	monthMenu := models.GetLastHalfYear()
 
-	data := make([]monthData, len(monthMenu)) // 预分配固定长度的切片
+	data := make([]monthData, 0, len(monthMenu)) // 预分配可变长度切片
+	ch := make(chan monthData)
+	quit := make(chan int)
 
-	for i, v := range monthMenu {
-		fmt.Println("处理:", v.Value)
-		wg.Add(1)
-		go getMonthData(i, v.Value, data)
+	go getMonthData(monthMenu, ch, quit)
+
+	for {
+		select {
+		case <-quit:
+			goto Done
+		case v := <-ch:
+			fmt.Println(v)
+			data = append(data, v)
+		}
+
 	}
 
-	wg.Wait()
-
+Done:
 	c.JSON(http.StatusOK, gin.H{
 		"code":      200,
 		"msg":       "获取成功",
@@ -223,12 +231,16 @@ func (ac AdminController) MonthRevenueChart(c *gin.Context) {
 	})
 }
 
-func getMonthData(index int, month string, data []monthData) {
-	fmt.Println("开始处理:", month)
-	var m = monthData{}
-	models.DB.Raw("SELECT SUM(price) price FROM revenue_log WHERE state =1 and dated like ? limit 1", month+"%").Scan(&m)
-	m.Month = month
+func getMonthData(monthMenu []models.MonthMenu, ch chan monthData, quit chan int) {
+	for _, v := range monthMenu {
+		month := v.Value
+		fmt.Println("处理:", month)
 
-	data[index] = m
-	wg.Done()
+		var m = monthData{}
+		models.DB.Raw("SELECT SUM(price) price FROM revenue_log WHERE state =1 and dated like ? limit 1", month+"%").Scan(&m)
+		m.Month = month
+		ch <- m
+	}
+
+	quit <- 0
 }
