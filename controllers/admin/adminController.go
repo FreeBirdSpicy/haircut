@@ -106,8 +106,19 @@ func (ac AdminController) MonthRevenue(c *gin.Context) {
 	c.HTML(http.StatusOK, "admin/month_revenue.html", gin.H{
 		"title":     "月度营收",
 		"monthMenu": monthMenu,
-		"month":     month,
 		"data":      result,
+	})
+}
+
+func (ac AdminController) GetMonthData(c *gin.Context) {
+	month := c.PostForm("month")
+
+	data := getDetail(month)
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "获取成功",
+		"data": data,
 	})
 }
 
@@ -216,7 +227,7 @@ func (ac AdminController) MonthRevenueChart(c *gin.Context) {
 		case <-quit:
 			goto Done
 		case v := <-ch:
-			fmt.Println(v)
+			// fmt.Println(v)
 			data = append(data, v)
 		}
 
@@ -234,7 +245,7 @@ Done:
 func getMonthData(monthMenu []models.MonthMenu, ch chan monthData, quit chan int) {
 	for _, v := range monthMenu {
 		month := v.Value
-		fmt.Println("处理:", month)
+		// fmt.Println("处理:", month)
 
 		var m = monthData{}
 		models.DB.Raw("SELECT SUM(price) price FROM revenue_log WHERE state =1 and dated like ? limit 1", month+"%").Scan(&m)

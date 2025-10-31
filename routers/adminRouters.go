@@ -67,6 +67,7 @@ func AdminRoutersInit(r *gin.Engine) {
 
 		// 月度营收
 		router.GET("/monthRevenue", admin.AdminController{}.MonthRevenue)
+		router.POST("/GetMonthData", admin.AdminController{}.GetMonthData)
 		router.POST("/monthRevenueExport", admin.AdminController{}.MonthRevenueExport)
 		router.POST("/MonthRevenueChart", admin.AdminController{}.MonthRevenueChart)
 

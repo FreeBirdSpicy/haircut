@@ -79,7 +79,7 @@
             <ul class="navbar-nav">
                 {{range $i, $v := .monthMenu}}
                 <li class="nav-item">
-                    <a class="nav-link {{$v.On}}" href="?month={{$v.Value}}">{{$v.Name}}</a>
+                    <a class="nav-link {{$v.On}}" href="javascript:void(0);" onclick="changeMonth(this, '{{$v.Value}}');">{{$v.Name}}</a>
                 </li>
                 {{end}}
                 <li class="nav-item export-btn-container">
@@ -125,6 +125,37 @@
     {{template "pop_window_sm_center" .}}
 </body>
 <script>
+    function changeMonth(t, month) {
+        if ($(t).hasClass('on')){
+            return;
+        }
+        $(".nav-link").removeClass('on');
+        $(t).addClass('on');
+        $("tbody").html("");
+        var html = "";
+
+        $.post("/GetMonthData", {month: month}, function(res) { 
+            if(res.code == 200){
+                $.each(res.data, function(i, v) { 
+                    html += `<tr>
+                                <td align="center">`+v.day+`</td>
+                                <td align="right">`
+                                    if(v.price > 0){
+                                html += v.price;
+                                    }
+                        html += `</td>
+                                <td align="right">`
+                                    if(v.num > 0){
+                                html += v.num;
+                                    }
+                        html += `</td>
+                            </tr>`;
+                })
+                $("tbody").html(html);
+            }
+        }, "json")
+    }
+
     function exportExcel(t) {
         $(t).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>下载中...');
         $(t).attr('disabled', true);
