@@ -131,7 +131,7 @@
         }
         $(".nav-link").removeClass('on');
         $(t).addClass('on');
-        $("tbody").html("");
+        // $("tbody").html("");
         var html = "";
 
         $.post("/GetMonthData", {month: month}, function(res) { 
