@@ -125,6 +125,8 @@
     {{template "pop_window_sm_center" .}}
 </body>
 <script>
+    var a = "{{.a}}";
+    var b = "{{.b}}";
     function changeMonth(t, month) {
         if ($(t).hasClass('on')){
             return;

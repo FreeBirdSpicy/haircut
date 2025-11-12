@@ -107,6 +107,8 @@ func (ac AdminController) MonthRevenue(c *gin.Context) {
 		"title":     "月度营收",
 		"monthMenu": monthMenu,
 		"data":      result,
+		"a":         cur_month,
+		"b":         month,
 	})
 }
 
